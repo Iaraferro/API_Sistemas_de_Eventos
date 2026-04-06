@@ -1,9 +1,8 @@
-package org.acme.model; // Pacote atualizado
+package org.acme.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,35 +10,28 @@ import java.util.List;
 @Entity
 public class Evento extends PanacheEntity {
 
-    // Campos agora são private
     private String nome;
     private String descricao;
     private LocalDateTime dataHora;
     private String categoria;
     private String local;  
-    private String contato;        // ← ADICIONAR
-    private String requisitos;     // ← ADICIONAR
+    private String contato;
+    private String requisitos;
     private Integer participantes; 
     private String organizador;
-    private String imagemPrincipal;  // ✅ Imagem de capa do evento
+    
+    // Imagem principal do evento (capa/banner)
+    private String imagemPrincipal;
+    
+    // Link para formulário de inscrição (ex: Google Forms)
+    private String linkInscricao;
 
-    /**
-     * @return the organizador
-     */
-    public String getOrganizador() {
-        return organizador;
-    }
-
-    /**
-     * @param organizador the organizador to set
-     */
-    public void setOrganizador(String organizador) {
-        this.organizador = organizador;
-    }
-
+    // Arquivos adicionais anexados ao evento
     @ElementCollection
-    private List<String> arquivos;   // ✅ Arquivos adicionais (PDFs, imagens extras)
-    // Getters e Setters
+    private List<String> arquivos;
+
+    // ==================== GETTERS E SETTERS ====================
+    
     public String getNome() {
         return nome;
     }
@@ -72,12 +64,29 @@ public class Evento extends PanacheEntity {
         this.local = local;
     }
 
-   public String getImagem(){
-         return imagemPrincipal;
-   }
-   public void setImagem(String imagem){
-    this.imagem = imagemPrincipal;
-   }
+    public String getOrganizador() {
+        return organizador;
+    }
+
+    public void setOrganizador(String organizador) {
+        this.organizador = organizador;
+    }
+
+    public String getImagemPrincipal() {
+        return imagemPrincipal;
+    }
+
+    public void setImagemPrincipal(String imagemPrincipal) {
+        this.imagemPrincipal = imagemPrincipal;
+    }
+    
+    public String getLinkInscricao() {
+        return linkInscricao;
+    }
+
+    public void setLinkInscricao(String linkInscricao) {
+        this.linkInscricao = linkInscricao;
+    }
 
     public List<String> getArquivos() {
         return arquivos;
@@ -87,17 +96,35 @@ public class Evento extends PanacheEntity {
         this.arquivos = arquivos;
     }
 
-
-       public String getCategoria() { return categoria; }
-    public void setCategoria(String categoria) { this.categoria = categoria; }
+    public String getCategoria() { 
+        return categoria; 
+    }
     
-    public String getContato() { return contato; }
-    public void setContato(String contato) { this.contato = contato; }
+    public void setCategoria(String categoria) { 
+        this.categoria = categoria; 
+    }
     
-    public String getRequisitos() { return requisitos; }
-    public void setRequisitos(String requisitos) { this.requisitos = requisitos; }
+    public String getContato() { 
+        return contato; 
+    }
     
-    public Integer getParticipantes() { return participantes; }
-    public void setParticipantes(Integer participantes) { this.participantes = participantes; }
+    public void setContato(String contato) { 
+        this.contato = contato; 
+    }
+    
+    public String getRequisitos() { 
+        return requisitos; 
+    }
+    
+    public void setRequisitos(String requisitos) { 
+        this.requisitos = requisitos; 
+    }
+    
+    public Integer getParticipantes() { 
+        return participantes; 
+    }
+    
+    public void setParticipantes(Integer participantes) { 
+        this.participantes = participantes; 
+    }
 }
-

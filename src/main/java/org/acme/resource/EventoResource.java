@@ -11,6 +11,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import jakarta.annotation.security.RolesAllowed;
 
 @Path("/eventos")
 @Produces(MediaType.APPLICATION_JSON)
@@ -27,7 +28,7 @@ public class EventoResource {
 
     @GET
     public List<EventoDTO> listAll() {
-        return service.listAll();
+        return service.findAll();
     }
 
     
