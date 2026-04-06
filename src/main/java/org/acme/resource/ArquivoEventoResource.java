@@ -4,6 +4,7 @@ import org.acme.dto.UploadArquivoEventoDTO;
 import org.acme.model.ArquivoEvento;
 import org.acme.service.ArquivoEventoService;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -13,13 +14,21 @@ import jakarta.ws.rs.core.Response;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * Upload de arquivos/documentos para eventos
+ * APENAS ADMINISTRADORES podem fazer upload
+ */
 @Path("/eventos/{idEvento}/arquivos")
 public class ArquivoEventoResource {
 
     @Inject
     ArquivoEventoService service;
 
+    /**
+     * Upload de arquivo para evento (APENAS ADMINISTRADORES)
+     */
     @POST
+    @RolesAllowed({"Adm"}) // ✅ APENAS ADM!
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Transactional
     public Response upload(@PathParam("idEvento") Long idEvento, UploadArquivoEventoDTO dto) {

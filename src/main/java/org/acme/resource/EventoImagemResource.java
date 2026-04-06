@@ -5,6 +5,7 @@ import org.acme.service.FileService;
 import org.jboss.resteasy.reactive.PartType;
 import org.jboss.resteasy.reactive.RestForm;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -16,6 +17,7 @@ import java.nio.file.Paths;
 
 /**
  * Resource para gerenciar upload de imagem principal dos eventos
+ * APENAS ADMINISTRADORES podem fazer upload
  */
 @Path("/eventos/{idEvento}/imagem")
 public class EventoImagemResource {
@@ -37,27 +39,22 @@ public class EventoImagemResource {
     }
 
     /**
-     * Faz upload da imagem principal (capa) do evento
-     * 
-     * @param idEvento ID do evento
-     * @param dto DTO com a imagem e nome do arquivo
-     * @return Resposta com a URL da imagem
+     * Upload de imagem principal (APENAS ADMINISTRADORES)
      */
     @POST
+    @RolesAllowed({"Adm"}) // ✅ APENAS ADM!
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Transactional
     public Response uploadImagemPrincipal(
             @PathParam("idEvento") Long idEvento,
             ImagemUploadDTO dto) {
 
-        // Validações
         if (dto == null || dto.imagem == null || dto.nomeArquivo == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Envie a imagem e o nome do arquivo")
                     .build();
         }
 
-        // Valida se é realmente uma imagem
         String mimeType;
         try {
             mimeType = Files.probeContentType(Paths.get(dto.nomeArquivo));
@@ -70,13 +67,9 @@ public class EventoImagemResource {
             mimeType = MediaType.APPLICATION_OCTET_STREAM;
         }
 
-        // Salva a imagem no MinIO
         String nomeArquivoSalvo = fileService.salvar(dto.nomeArquivo, dto.imagem, mimeType);
-
-        // Atualiza o evento com a imagem principal
         eventoService.atualizarImagemPrincipal(idEvento, nomeArquivoSalvo);
 
-        // Retorna a URL completa da imagem
         String urlImagem = "/arquivos/" + nomeArquivoSalvo;
 
         return Response.ok()
@@ -85,23 +78,16 @@ public class EventoImagemResource {
     }
 
     /**
-     * Remove a imagem principal do evento
-     * 
-     * @param idEvento ID do evento
-     * @return Resposta sem conteúdo
+     * Remove imagem principal (APENAS ADMINISTRADORES)
      */
     @DELETE
+    @RolesAllowed({"Adm"}) // ✅ APENAS ADM!
     @Transactional
     public Response removerImagemPrincipal(@PathParam("idEvento") Long idEvento) {
-        
         eventoService.removerImagemPrincipal(idEvento);
-        
         return Response.noContent().build();
     }
 
-    /**
-     * Classe de resposta para o upload de imagem
-     */
     public static class ImagemResponse {
         public String nomeArquivo;
         public String urlAcesso;
