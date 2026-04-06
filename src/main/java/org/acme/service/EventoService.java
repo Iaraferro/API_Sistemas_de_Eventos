@@ -1,6 +1,5 @@
-package org.acme.service; // Pacote atualizado
+package org.acme.service;
 
-// Imports atualizados
 import org.acme.dto.EventoDTO;
 import org.acme.dto.EventoResponseDTO;
 import org.acme.model.Evento;
@@ -28,7 +27,7 @@ public class EventoService {
     @Inject
     UsuarioRepository usuarioRepository;
 
-    public List<EventoDTO> listAll() {
+    public List<EventoDTO> findAll() {
         return eventoRepository.listAll().stream()
                 .map(EventoDTO::from)
                 .collect(Collectors.toList());
@@ -51,15 +50,20 @@ public class EventoService {
         entity.setDataHora(dto.dataHora());
         entity.setLocal(dto.local());
         entity.setRequisitos(dto.requisitos());
-        entity.setCategoria(dto.categoria());     // ← ADICIONAR
+        entity.setCategoria(dto.categoria());
         entity.setContato(dto.contato());
         entity.setParticipantes(dto.participantes() != null ? dto.participantes() : 0); 
-        // ← AUTOMÁTICO, sem enviar idOrganizador
+        
+        // ✅ CORRETO: Usa o username do usuário autenticado
         entity.setOrganizador(username);
-        entity.setImagem(dto.imagem());
-        entity.setOrganizador("admin@ecoeventos.com");
-
+        
+        // ❌ REMOVIDO: entity.setOrganizador("admin@ecoeventos.com");
+        // Não sobrescrever com valor hardcoded!
+        
+        entity.setImagemPrincipal(dto.imagemPrincipal());
+        entity.setLinkInscricao(dto.linkInscricao());
         entity.setArquivos(dto.arquivos());
+        
         eventoRepository.persist(entity);
 
         return EventoDTO.from(entity);
@@ -75,16 +79,24 @@ public class EventoService {
         String username = jwt.getSubject();
 
         if (username == null) {
-            throw new NotFoundException("Organizador (Usuário) não encontrado.");
+            throw new NotFoundException("Usuário não autenticado.");
         }
 
-        // Usando setters
+        // Atualiza os campos
         entity.setNome(dto.nome());
         entity.setDescricao(dto.descricao());
         entity.setDataHora(dto.dataHora());
         entity.setLocal(dto.local());
-        entity.setOrganizador(username);
+        entity.setCategoria(dto.categoria());
+        entity.setContato(dto.contato());
+        entity.setRequisitos(dto.requisitos());
+        entity.setParticipantes(dto.participantes());
+        entity.setImagemPrincipal(dto.imagemPrincipal());
+        entity.setLinkInscricao(dto.linkInscricao());
         entity.setArquivos(dto.arquivos());
+        
+        // Mantém o organizador original
+        // entity.setOrganizador(username); <- Não muda o organizador no update
 
         return EventoDTO.from(entity);
     }
@@ -98,15 +110,31 @@ public class EventoService {
         eventoRepository.delete(entity);
     }
 
-    public List<EventoResponseDTO> findAll() {
-
-        return eventoRepository.findAll().stream()
-                .map(EventoDTO::from)
-                .map(EventoResponseDTO::valueOf)
-                .collect(Collectors.toList());
-
+    /**
+ * Atualiza a imagem principal de um evento
+ */
+@Transactional
+public void atualizarImagemPrincipal(Long idEvento, String nomeArquivo) {
+    Evento evento = eventoRepository.findById(idEvento);
+    if (evento == null) {
+        throw new NotFoundException("Evento não encontrado.");
     }
+    
+    evento.setImagemPrincipal(nomeArquivo);
+    eventoRepository.persist(evento);
+}
 
-
-
+/**
+ * Remove a imagem principal de um evento
+ */
+@Transactional
+public void removerImagemPrincipal(Long idEvento) {
+    Evento evento = eventoRepository.findById(idEvento);
+    if (evento == null) {
+        throw new NotFoundException("Evento não encontrado.");
+    }
+    
+    evento.setImagemPrincipal(null);
+    eventoRepository.persist(evento);
+}
 }

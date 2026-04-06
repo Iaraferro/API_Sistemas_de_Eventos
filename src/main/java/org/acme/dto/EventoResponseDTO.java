@@ -1,31 +1,69 @@
 package org.acme.dto;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.List;
 
+/**
+ * DTO de resposta para eventos
+ * Inclui URLs completas para facilitar o consumo no front-end
+ */
 public record EventoResponseDTO(
     Long id,
     String nome,
     String descricao,
-    String dataHora,
+    LocalDateTime dataHora,
     String local,
-    java.util.List<String> arquivos,
-    String imagemPrincipal
+    String categoria,
+    String organizador,
+    String contato,
+    String requisitos,
+    Integer participantes,
+    
+    // URL completa da imagem principal
+    String imagemPrincipalUrl,
+    
+    // Link para formulário de inscrição
+    String linkInscricao,
+    
+    // URLs dos arquivos
+    List<String> arquivosUrls
 ) {
-    public static EventoResponseDTO valueOf(EventoDTO evento) {
-        String imagemPrincipal = evento.imagem() != null ? 
-            evento.imagem() : 
-            Optional.ofNullable(evento.arquivos())
-                .filter(list -> !list.isEmpty()) 
-                .map(list -> list.get(0)) 
-                .orElse(null);
+    
+    /**
+     * Converte EventoDTO para EventoResponseDTO
+     * Adiciona o prefixo /arquivos/ nas URLs
+     */
+    public static EventoResponseDTO from(EventoDTO dto) {
+        
+        // Monta URL da imagem principal
+        String imagemUrl = dto.imagemPrincipal() != null 
+            ? "/arquivos/" + dto.imagemPrincipal() 
+            : null;
+        
+        // Monta URLs dos arquivos
+        List<String> arquivosUrls = null;
+        if (dto.arquivos() != null && !dto.arquivos().isEmpty()) {
+            arquivosUrls = dto.arquivos()
+                .stream()
+                .map(arquivo -> "/arquivos/" + arquivo)
+                .toList();
+        }
+        
         return new EventoResponseDTO(
-            evento.id(),
-            evento.nome(),
-            evento.descricao(),
-            evento.dataHora().toString(),
-            evento.local(),
-            evento.arquivos(),
-            imagemPrincipal
+            dto.id(),
+            dto.nome(),
+            dto.descricao(),
+            dto.dataHora(),
+            dto.local(),
+            dto.categoria(),
+            dto.organizador(),
+            dto.contato(),
+            dto.requisitos(),
+            dto.participantes(),
+            imagemUrl,
+            dto.linkInscricao(),
+            arquivosUrls
         );
     }
 }
+

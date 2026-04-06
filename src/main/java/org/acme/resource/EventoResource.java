@@ -40,7 +40,7 @@ public class EventoResource {
     }
 
     @POST
-   // @RolesAllowed({"User", "Adm"})
+    @RolesAllowed({"User", "Adm"})
     @Transactional
     public Response create(EventoDTO dto) {
         String username = jwt.getSubject();

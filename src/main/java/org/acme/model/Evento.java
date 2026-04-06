@@ -21,7 +21,7 @@ public class Evento extends PanacheEntity {
     private String requisitos;     // ← ADICIONAR
     private Integer participantes; 
     private String organizador;
-    private String imagem;
+    private String imagemPrincipal;  // ✅ Imagem de capa do evento
 
     /**
      * @return the organizador
@@ -38,8 +38,7 @@ public class Evento extends PanacheEntity {
     }
 
     @ElementCollection
-    private List<String> arquivos;
-
+    private List<String> arquivos;   // ✅ Arquivos adicionais (PDFs, imagens extras)
     // Getters e Setters
     public String getNome() {
         return nome;
@@ -74,10 +73,10 @@ public class Evento extends PanacheEntity {
     }
 
    public String getImagem(){
-         return imagem;
+         return imagemPrincipal;
    }
    public void setImagem(String imagem){
-    this.imagem = imagem;
+    this.imagem = imagemPrincipal;
    }
 
     public List<String> getArquivos() {
