@@ -11,7 +11,7 @@ public record EventoDTO(
         String nome,
         String descricao,
         LocalDateTime dataHora,
-          String local,
+        String local,
         String categoria,      // ← ADICIONAR
         String organizador,    // ← ADICIONAR  
         String contato,        // ← ADICIONAR
