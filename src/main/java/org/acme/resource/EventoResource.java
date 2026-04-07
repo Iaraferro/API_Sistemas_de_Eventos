@@ -64,17 +64,19 @@ public class EventoResource {
      * Cria novo evento (APENAS ADMINISTRADORES)
      */
     @POST
-    @RolesAllowed({"Adm"}) // ✅ APENAS ADM!
+    @RolesAllowed({ "Adm" })
     @Transactional
     public Response create(@Valid EventoDTO dto) {
         String username = jwt.getSubject();
-        LOG.infov("POST /eventos called by ADMIN user={0}", username);
-        
-        EventoDTO eventoCriado = service.create(dto, username);
-        
-        return Response.status(Response.Status.CREATED)
-                .entity(eventoCriado)
-                .build();
+        LOG.infov("POST /eventos called by user={0}, dto={1}", username, dto);
+
+        try {
+            EventoDTO eventoCriado = service.create(dto, username);
+            return Response.status(Response.Status.CREATED).entity(eventoCriado).build();
+        } catch (Exception e) {
+            LOG.errorv("Erro ao criar evento: {0}", e.getMessage());
+            throw e; // ← Deixa o GlobalExceptionMapper tratar
+        }
     }
 
     /**
@@ -82,12 +84,12 @@ public class EventoResource {
      */
     @PUT
     @Path("/{id}")
-    @RolesAllowed({"Adm"}) // ✅ APENAS ADM!
+    @RolesAllowed({ "Adm" }) // ✅ APENAS ADM!
     @Transactional
     public EventoDTO update(@PathParam("id") Long id, @Valid EventoDTO dto) {
         String username = jwt.getSubject();
         LOG.infov("PUT /eventos/{0} called by ADMIN user={1}", id, username);
-        
+
         return service.update(id, dto);
     }
 
@@ -96,14 +98,14 @@ public class EventoResource {
      */
     @DELETE
     @Path("/{id}")
-    @RolesAllowed({"Adm"}) // ✅ APENAS ADM!
+    @RolesAllowed({ "Adm" }) // ✅ APENAS ADM!
     @Transactional
     public Response delete(@PathParam("id") Long id) {
         String username = jwt.getSubject();
         LOG.infov("DELETE /eventos/{0} called by ADMIN user={1}", id, username);
-        
+
         service.delete(id);
-        
+
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 }

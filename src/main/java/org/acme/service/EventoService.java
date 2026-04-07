@@ -1,7 +1,6 @@
 package org.acme.service;
 
 import org.acme.dto.EventoDTO;
-import org.acme.dto.EventoResponseDTO;
 import org.acme.model.Evento;
 import org.acme.repository.EventoRepository;
 import org.acme.repository.UsuarioRepository;

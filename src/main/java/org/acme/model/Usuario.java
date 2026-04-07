@@ -9,7 +9,7 @@ public class Usuario extends DefaultEntity {
     @Column(length = 30, unique = true)
     private String username;
 
-    @Column(length = 88)
+    @Column(length = 120)
     private String senha;
 
     private Perfil perfil;
