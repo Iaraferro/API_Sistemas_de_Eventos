@@ -1,0 +1,98 @@
+# ============================================================
+# EcoEventos — Backend Stack (Docker Compose)
+#
+# Sobe: API Quarkus + MariaDB + MinIO
+# O Angular roda localmente em localhost:4200
+#
+# Comandos:
+#   Subir tudo:    docker compose up -d --build
+#   Ver logs:      docker compose logs -f api
+#   Parar tudo:    docker compose down
+#   Apagar dados:  docker compose down -v
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # Banco de Dados — MariaDB 11
+  # ----------------------------------------------------------
+  db:
+    image: mariadb:11
+    container_name: ecoeventos-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-eventos}
+      MARIADB_USER: ${DB_USER:-root}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-123456}
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-123456}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ----------------------------------------------------------
+  # Armazenamento de Arquivos — MinIO (compatível com S3)
+  # Console UI: http://localhost:9001  (admin / password)
+  # API:        http://localhost:9000
+  # ----------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: ecoeventos-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ----------------------------------------------------------
+  # Backend — Quarkus API
+  # Build multi-stage: Java 17 compilado dentro do container
+  # http://localhost:8080
+  # ----------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecoeventos-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      QUARKUS_PROFILE: docker
+      DB_HOST: db
+      DB_PORT: 3306
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+# ----------------------------------------------------------
+# Volumes persistentes
+# ----------------------------------------------------------
+volumes:
+  mariadb_data:
+    name: ecoeventos-mariadb
+  minio_data:
+    name: ecoeventos-minio

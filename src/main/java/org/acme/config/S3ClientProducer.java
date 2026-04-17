@@ -2,6 +2,7 @@ package org.acme.config;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -18,15 +19,27 @@ import java.net.URI;
 public class S3ClientProducer {
 
     private static final Logger LOG = Logger.getLogger(S3ClientProducer.class);
-    
+
     private static final String BUCKET_NAME = "eventos-arquivos";
+
+    @ConfigProperty(name = "minio.endpoint")
+    String minioEndpoint;
+
+    @ConfigProperty(name = "minio.access-key")
+    String minioAccessKey;
+
+    @ConfigProperty(name = "minio.secret-key")
+    String minioSecretKey;
+
+    @ConfigProperty(name = "minio.region")
+    String minioRegion;
 
     @Produces
     public S3Client s3Client() {
-        String endpoint = "http://localhost:9000";
-        String accessKey = "admin";
-        String secretKey = "password";
-        String region = "us-east-1";
+        String endpoint  = minioEndpoint;
+        String accessKey = minioAccessKey;
+        String secretKey = minioSecretKey;
+        String region    = minioRegion;
 
         LOG.info("🔧 Configurando cliente S3/MinIO...");
 
