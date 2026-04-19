@@ -58,6 +58,8 @@ public class EventoResource {
         return Response.ok("EcoEventos API is running! ✅").build();
     }
 
+    
+
     // =========== ENDPOINTS ADMINISTRATIVOS (APENAS ADM) ===========
 
     /**

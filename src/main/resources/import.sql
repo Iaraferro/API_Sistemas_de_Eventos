@@ -27,24 +27,24 @@ VALUES (
 );
 
 -- Evento de exemplo
-INSERT INTO Evento (
-    id, nome, descricao, dataHora, local, categoria, 
-    organizador, contato, requisitos, participantes, 
-    imagemPrincipal, linkInscricao
-) VALUES (
-    1,
-    'Palestra sobre Sustentabilidade',
-    'Evento de conscientização ambiental promovido pela FMA',
-    TIMESTAMP '2024-12-15 14:00:00',
-    'Auditório FMA',
-    'Palestra',
-    'admin',
-    'eventos@fma.palmas.to.gov.br',
-    'Trazer caneta e caderno',
-    100,
-    null,
-    'https://forms.google.com/exemplo'
-);
+-- INSERT INTO Evento (
+--     id, nome, descricao, dataHora, local, categoria, 
+--     organizador, contato, requisitos, participantes, 
+--     imagemPrincipal, linkInscricao
+-- ) VALUES (
+--     1,
+--     'Palestra sobre Sustentabilidade',
+--     'Evento de conscientização ambiental promovido pela FMA',
+--     TIMESTAMP '2024-12-15 14:00:00',
+--     'Auditório FMA',
+--     'Palestra',
+--     'admin',
+--     'eventos@fma.palmas.to.gov.br',
+--     'Trazer caneta e caderno',
+--     100,
+--     null,
+--     'https://forms.google.com/exemplo'
+-- );
 
 -- Ajustar sequences
-ALTER SEQUENCE Evento_SEQ RESTART WITH 100;
+-- ALTER SEQUENCE Evento_SEQ RESTART WITH 100;
