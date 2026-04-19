@@ -53,11 +53,8 @@ public class EventoService {
         entity.setContato(dto.contato());
         entity.setParticipantes(dto.participantes() != null ? dto.participantes() : 0); 
         
-        // ✅ CORRETO: Usa o username do usuário autenticado
-        entity.setOrganizador(username);
         
-        // ❌ REMOVIDO: entity.setOrganizador("admin@ecoeventos.com");
-        // Não sobrescrever com valor hardcoded!
+        entity.setOrganizador(username);
         
         entity.setImagemPrincipal(dto.imagemPrincipal());
         entity.setLinkInscricao(dto.linkInscricao());

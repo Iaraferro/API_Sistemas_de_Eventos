@@ -15,7 +15,7 @@ public record EventoDTO(
     String descricao,
     
     @NotNull(message = "A data/hora deve ser informada.")
-    @Future(message = "A data/hora deve ser no futuro.")
+    
     LocalDateTime dataHora,
     
     @NotBlank(message = "O local deve ser informado.")

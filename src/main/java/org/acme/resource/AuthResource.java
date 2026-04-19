@@ -1,13 +1,18 @@
 package org.acme.resource;
 
+import java.util.Map;
+
 import org.acme.dto.AuthDTO;
+import org.acme.dto.AuthResponseDTO;
 import org.acme.dto.UsuarioResponseDTO;
 import org.acme.service.HashService;
 import org.acme.service.JwtService;
 import org.acme.service.UsuarioService;
 
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -16,6 +21,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("auth")
 @Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
 
     @Inject
@@ -27,31 +33,43 @@ public class AuthResource {
     @Inject
     UsuarioService usuarioService;
 
+    
     @POST
-    @Produces(MediaType.TEXT_PLAIN)
     public Response login(AuthDTO dto) {
         String hash;
         try {
             hash = hashService.getHashSenha(dto.senha());
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Erro ao processar senha")
+                    .entity(Map.of(
+                        "error", "Erro ao processar senha",
+                        "timestamp", System.currentTimeMillis()
+                    ))
                     .build();
         }
 
-        UsuarioResponseDTO usuario = usuarioService.findByUsernameAndSenha(dto.username(), hash);
+        UsuarioResponseDTO usuario = usuarioService.findByUsernameAndSenha(
+            dto.username(), 
+            hash
+        );
 
         if (usuario == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("Credenciais inválidas")
+                    .entity(Map.of(
+                        "error", "Credenciais inválidas",
+                        "timestamp", System.currentTimeMillis()
+                    ))
                     .build();
         }
         
-        String token = jwtService.generateJwt(usuario.username(), usuario.perfil().getNome());
+        String token = jwtService.generateJwt(
+            usuario.username(), 
+            usuario.perfil().getNome()
+        );
         
-        // ✅ SEMPRE retornar 200 com o token no corpo
-        return Response.ok(token)
-                .header("Authorization", "Bearer " + token)
+        // ✅ Retorna JSON estruturado (profissional!)
+        return Response.ok(AuthResponseDTO.from(token, usuario))
                 .build();
     }
+
 }

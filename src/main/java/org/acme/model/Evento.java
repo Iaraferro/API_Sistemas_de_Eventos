@@ -1,8 +1,10 @@
 package org.acme.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.List;
 public class Evento extends PanacheEntity {
 
     private String nome;
+    @Column(nullable = false, length = 5000)
     private String descricao;
     private LocalDateTime dataHora;
     private String categoria;
@@ -19,7 +22,8 @@ public class Evento extends PanacheEntity {
     private String requisitos;
     private Integer participantes; 
     private String organizador;
-    
+    @OneToMany(mappedBy = "evento")
+    private List<Inscricao> inscricoes;
     // Imagem principal do evento (capa/banner)
     private String imagemPrincipal;
     
@@ -126,5 +130,10 @@ public class Evento extends PanacheEntity {
     
     public void setParticipantes(Integer participantes) { 
         this.participantes = participantes; 
+    }
+
+    public String getTitulo() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getTitulo'");
     }
 }
