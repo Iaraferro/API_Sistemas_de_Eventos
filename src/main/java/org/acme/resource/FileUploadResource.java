@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.acme.service.FileService;
+import jakarta.annotation.security.RolesAllowed;
 
 @Path("/arquivos")
 public class FileUploadResource {
@@ -37,6 +38,7 @@ public class FileUploadResource {
 
     @POST
     @Path("/upload")
+    @RolesAllowed({ "Adm" })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response upload(UploadDTO dto) {
 
@@ -75,12 +77,13 @@ public class FileUploadResource {
         }
 
         return Response.ok(data)
-                .type(mimeType) 
+                .type(mimeType)
                 .build();
     }
 
     @DELETE
     @Path("/{nome}")
+    @RolesAllowed({ "Adm" })
     public Response deletar(@PathParam("nome") String nome) {
         try {
             fileService.deletar(nome);
@@ -91,6 +94,5 @@ public class FileUploadResource {
                     .build();
         }
     }
-
 
 }

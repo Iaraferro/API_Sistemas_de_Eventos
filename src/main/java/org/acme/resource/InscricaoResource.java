@@ -48,6 +48,7 @@ public class InscricaoResource {
 
     @GET
     @Path("/evento/{eventoId}")
+    @RolesAllowed({ "Adm" })
     public Response listarPorEvento(
             @PathParam("eventoId") Long eventoId,
             @QueryParam("page") @DefaultValue("0") int page,
@@ -60,6 +61,7 @@ public class InscricaoResource {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed({ "Adm" })
     public Response deletar(@PathParam("id") Long id) {
         service.deletar(id);
         return Response.noContent().build();
