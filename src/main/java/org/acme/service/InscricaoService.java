@@ -27,10 +27,9 @@ public class InscricaoService {
         }
 
         boolean emailJaExiste = Inscricao.count(
-            "evento.id = ?1 and lower(email) = lower(?2)",
-            dto.eventoId(),
-            dto.email()
-        ) > 0;
+                "evento.id = ?1 and lower(email) = lower(?2)",
+                dto.eventoId(),
+                dto.email()) > 0;
 
         if (emailJaExiste) {
             throw new BadRequestException("Este e-mail já foi inscrito neste evento.");
@@ -52,13 +51,21 @@ public class InscricaoService {
 
         return Inscricao.find(
                 "evento.id = ?1 order by dataInscricao desc",
-                eventoId
-        )
-        .page(Page.of(page, size))
-        .list()
-        .stream()
-        .map(i -> toResponse((Inscricao) i))
-        .collect(Collectors.toList());
+                eventoId)
+                .page(Page.of(page, size))
+                .list()
+                .stream()
+                .map(i -> toResponse((Inscricao) i))
+                .collect(Collectors.toList());
+    }
+
+    public List<InscricaoResponseDTO> listarTodas(int page, int size) {
+        return Inscricao.findAll()
+                .page(Page.of(page, size))
+                .list()
+                .stream()
+                .map(i -> toResponse((Inscricao) i))
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -75,12 +82,12 @@ public class InscricaoService {
 
     private InscricaoResponseDTO toResponse(Inscricao i) {
         return new InscricaoResponseDTO(
-            i.getId(),
-            i.getNome(),
-            i.getEmail(),
-            i.getTelefone(),
-            i.getEvento().getNome(),
-            i.getDataInscricao()
-        );
+                i.getId(),
+                i.getNome(),
+                i.getEmail(),
+                i.getTelefone(),
+                i.getEvento().id,
+                i.getEvento().getNome(),
+                i.getDataInscricao());
     }
 }

@@ -132,8 +132,4 @@ public class Evento extends PanacheEntity {
         this.participantes = participantes; 
     }
 
-    public String getTitulo() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTitulo'");
-    }
 }
