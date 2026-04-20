@@ -11,14 +11,10 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
 public class ArquivoEventoService {
-
-    @Inject
-    FileService fileService;
 
     @Inject
     ArquivoEventoRepository arquivoEventoRepository;
@@ -27,33 +23,21 @@ public class ArquivoEventoService {
     EventoRepository eventoRepository;
 
     @Transactional
-    public ArquivoEvento salvarArquivo(Long idEvento, String nomeOriginal, byte[] conteudo, String mimeType) {
+    public ArquivoEvento salvarArquivo(Long idEvento, String nomeOriginal, String urlCloudinary, String mimeType) {
 
         Evento evento = eventoRepository.findById(idEvento);
         if (evento == null) {
             throw new NotFoundException("Evento não encontrado.");
         }
 
-        // Salva no MinIO
-        String nomeSalvo = fileService.salvar(nomeOriginal, conteudo, mimeType);
-
-        // Cria o registro
         ArquivoEvento arq = new ArquivoEvento();
         arq.setNomeOriginal(nomeOriginal);
-        arq.setNomeSalvo(nomeSalvo);
+        arq.setNomeSalvo(urlCloudinary);
         arq.setMimeType(mimeType);
         arq.setEvento(evento);
         arq.setDataUpload(LocalDateTime.now());
 
         arquivoEventoRepository.persist(arq);
-
-        List<String> arquivosDoEvento = evento.getArquivos();
-        if (arquivosDoEvento == null) {
-            arquivosDoEvento = new ArrayList<>();
-            evento.setArquivos(arquivosDoEvento);
-        }
-        arquivosDoEvento.add(nomeSalvo);
-        eventoRepository.persist(evento);
 
         return arq;
     }
@@ -62,22 +46,12 @@ public class ArquivoEventoService {
         return arquivoEventoRepository.findByEvento(idEvento);
     }
 
-    public String buscarPrimeiraImagemEvento(Long idEvento) {
-    List<ArquivoEvento> arquivos = listarArquivosPorEvento(idEvento);
-    if (arquivos != null && !arquivos.isEmpty()) {
-        // Buscar primeiro arquivo que seja imagem
-        for (ArquivoEvento arquivo : arquivos) {
-            if (arquivo.getMimeType() != null && arquivo.getMimeType().startsWith("image/")) {
-                return arquivo.getNomeSalvo();
-            }
+    @Transactional
+    public void deletarArquivo(Long id) {
+        ArquivoEvento arq = arquivoEventoRepository.findById(id);
+        if (arq == null) {
+            throw new NotFoundException("Arquivo não encontrado.");
         }
-        // Se não encontrou imagem, retorna o primeiro arquivo
-        return arquivos.get(0).getNomeSalvo();
-    }
-    return null;
-}
-
-    public void deletarArquivo(String nomeArquivo) {
-        fileService.deletar(nomeArquivo);
+        arquivoEventoRepository.delete(arq);
     }
 }

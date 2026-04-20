@@ -6,6 +6,9 @@ import jakarta.persistence.Entity;
 @Entity
 public class Usuario extends DefaultEntity {
 
+    @Column(length = 60)
+    private String nome;
+
     @Column(length = 30, unique = true)
     private String username;
 
@@ -14,10 +17,16 @@ public class Usuario extends DefaultEntity {
 
     private Perfil perfil;
 
-
     private String email;
 
-    
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -42,11 +51,9 @@ public class Usuario extends DefaultEntity {
         this.perfil = perfil;
     }
 
-
     public String getEmail() {
         return email;
     }
-
 
     public void setEmail(String email) {
         this.email = email;

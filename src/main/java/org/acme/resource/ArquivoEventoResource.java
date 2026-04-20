@@ -1,6 +1,5 @@
 package org.acme.resource;
 
-import org.acme.dto.UploadArquivoEventoDTO;
 import org.acme.model.ArquivoEvento;
 import org.acme.service.ArquivoEventoService;
 
@@ -11,43 +10,55 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.List;
 
-/**
- * Upload de arquivos/documentos para eventos
- * APENAS ADMINISTRADORES podem fazer upload
- */
 @Path("/eventos/{idEvento}/arquivos")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class ArquivoEventoResource {
 
     @Inject
     ArquivoEventoService service;
 
-    /**
-     * Upload de arquivo para evento (APENAS ADMINISTRADORES)
-     */
+    public record ArquivoRequest(
+            String nomeOriginal,
+            String urlCloudinary,
+            String mimeType) {
+    }
+
     @POST
-    @RolesAllowed({"Adm"}) // ✅ APENAS ADM!
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RolesAllowed({ "Adm" })
     @Transactional
-    public Response upload(@PathParam("idEvento") Long idEvento, UploadArquivoEventoDTO dto) {
-
-        if (dto.arquivo == null || dto.nomeArquivo == null) {
+    public Response salvar(@PathParam("idEvento") Long idEvento, ArquivoRequest req) {
+        if (req.nomeOriginal() == null || req.urlCloudinary() == null) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Envie arquivo e nomeArquivo").build();
+                    .entity("Informe nomeOriginal e urlCloudinary").build();
         }
 
-        String mimeType;
-        try {
-            mimeType = Files.probeContentType(Paths.get(dto.nomeArquivo));
-            if (mimeType == null) mimeType = MediaType.APPLICATION_OCTET_STREAM;
-        } catch (Exception e) {
-            mimeType = MediaType.APPLICATION_OCTET_STREAM;
-        }
+        String mimeType = req.mimeType() != null ? req.mimeType() : "application/octet-stream";
 
-        ArquivoEvento arq = service.salvarArquivo(idEvento, dto.nomeArquivo, dto.arquivo, mimeType);
+        ArquivoEvento arq = service.salvarArquivo(
+                idEvento,
+                req.nomeOriginal(),
+                req.urlCloudinary(),
+                mimeType);
 
         return Response.status(Response.Status.CREATED).entity(arq).build();
+    }
+
+    @GET
+    @RolesAllowed({ "Adm" })
+    public Response listar(@PathParam("idEvento") Long idEvento) {
+        List<ArquivoEvento> arquivos = service.listarArquivosPorEvento(idEvento);
+        return Response.ok(arquivos).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @RolesAllowed({ "Adm" })
+    @Transactional
+    public Response deletar(@PathParam("idEvento") Long idEvento, @PathParam("id") Long id) {
+        service.deletarArquivo(id);
+        return Response.noContent().build();
     }
 }

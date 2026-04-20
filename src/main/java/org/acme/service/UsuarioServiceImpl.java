@@ -20,7 +20,6 @@ import org.acme.repository.UsuarioRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 
-
 @ApplicationScoped
 public class UsuarioServiceImpl implements UsuarioService {
 
@@ -31,7 +30,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     HashService hashService;
 
     @Inject
-    Validator validator; 
+    Validator validator;
 
     @Override
     @Transactional
@@ -39,10 +38,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         validarDTO(dto);
         validarRegrasDeNegocio(dto);
 
-        
-    
         Usuario novoUsuario = new Usuario();
         novoUsuario.setUsername(dto.username());
+        novoUsuario.setNome(dto.nome());
         novoUsuario.setEmail(dto.email());
 
         try {
@@ -51,7 +49,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RuntimeException("Erro ao gerar o hash da senha.", e);
         }
 
-        novoUsuario.setPerfil(Perfil.valueOf(dto.id_perfil())); 
+        novoUsuario.setPerfil(Perfil.valueOf(dto.id_perfil()));
 
         usuarioRepository.persist(novoUsuario);
 
@@ -85,8 +83,6 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
 
         validarDTO(dto);
-
-
 
         usuario.setUsername(dto.username());
         usuario.setEmail(dto.email());
