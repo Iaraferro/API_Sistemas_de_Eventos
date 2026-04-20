@@ -37,7 +37,7 @@ class EventoResourceTest {
                 .then()
                 .statusCode(200)
                 .extract()
-                .asString();
+                .jsonPath().getString("token");
 
         System.out.println("✅ Token Admin obtido: " + tokenAdmin.substring(0, 50) + "...");
     }
@@ -59,7 +59,7 @@ class EventoResourceTest {
                 .then()
                 .statusCode(200)
                 .extract()
-                .asString();
+                .jsonPath().getString("token");
 
         System.out.println("✅ Token User obtido: " + tokenUser.substring(0, 50) + "...");
     }
@@ -324,5 +324,146 @@ class EventoResourceTest {
                 .statusCode(204);
 
         System.out.println("✅ ADMIN deletou evento com sucesso");
+    }
+
+    // =================================================================
+    // TESTES DE INSCRIÇÃO
+    // =================================================================
+
+    @Test
+    @Order(14)
+    @DisplayName("14. Deve criar inscrição em evento público")
+    void testCriarInscricao() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {
+                            "eventoId": 1,
+                            "nome": "João da Silva",
+                            "email": "joao@teste.com",
+                            "telefone": "63999999999"
+                        }
+                        """)
+                .when()
+                .post("/inscricoes")
+                .then()
+                .statusCode(201)
+                .body("nome", equalTo("João da Silva"))
+                .body("eventoNome", notNullValue());
+
+        System.out.println("✅ Inscrição criada com sucesso");
+    }
+
+    @Test
+    @Order(15)
+    @DisplayName("15. Deve rejeitar inscrição com email duplicado")
+    void testCriarInscricaoEmailDuplicado() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {
+                            "eventoId": 1,
+                            "nome": "João Duplicado",
+                            "email": "joao@teste.com",
+                            "telefone": "63999999999"
+                        }
+                        """)
+                .when()
+                .post("/inscricoes")
+                .then()
+                .statusCode(400);
+
+        System.out.println("✅ Email duplicado rejeitado corretamente");
+    }
+
+    @Test
+    @Order(16)
+    @DisplayName("16. Deve listar inscrições apenas para ADM")
+    void testListarInscricoesRequerAdmin() {
+        given()
+                .when()
+                .get("/inscricoes")
+                .then()
+                .statusCode(401);
+
+        System.out.println("✅ Listagem de inscrições bloqueada sem token");
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("17. ADM deve conseguir listar inscrições")
+    void testAdminListaInscricoes() {
+        given()
+                .header("Authorization", "Bearer " + tokenAdmin)
+                .when()
+                .get("/inscricoes")
+                .then()
+                .statusCode(200);
+
+        System.out.println("✅ Admin listou inscrições com sucesso");
+    }
+
+    // =================================================================
+    // TESTES DE USUÁRIO
+    // =================================================================
+
+    @Test
+    @Order(18)
+    @DisplayName("18. Deve criar novo usuário")
+    void testCriarUsuario() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {
+                            "nome": "Novo Usuario",
+                            "email": "novo@teste.com",
+                            "username": "novousuario",
+                            "senha": "senha123",
+                            "id_perfil": 2
+                        }
+                        """)
+                .when()
+                .post("/usuarios")
+                .then()
+                .statusCode(201)
+                .body("username", equalTo("novousuario"));
+
+        System.out.println("✅ Usuário criado com sucesso");
+    }
+
+    @Test
+    @Order(19)
+    @DisplayName("19. Deve rejeitar username duplicado")
+    void testCriarUsuarioUsernameDuplicado() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {
+                            "nome": "Admin Duplicado",
+                            "email": "outro@teste.com",
+                            "username": "admin",
+                            "senha": "senha123",
+                            "id_perfil": 2
+                        }
+                        """)
+                .when()
+                .post("/usuarios")
+                .then()
+                .statusCode(400);
+
+        System.out.println("✅ Username duplicado rejeitado corretamente");
+    }
+
+    @Test
+    @Order(20)
+    @DisplayName("20. Deve retornar 404 para evento inexistente")
+    void testBuscarEventoInexistente() {
+        given()
+                .when()
+                .get("/eventos/99999")
+                .then()
+                .statusCode(404);
+
+        System.out.println("✅ 404 retornado para evento inexistente");
     }
 }

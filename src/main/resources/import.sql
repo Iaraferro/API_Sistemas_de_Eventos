@@ -48,3 +48,5 @@ VALUES (
 
 -- Ajustar sequences
 -- ALTER SEQUENCE Evento_SEQ RESTART WITH 100;
+
+SELECT setval(pg_get_serial_sequence('usuario', 'id'), 100);

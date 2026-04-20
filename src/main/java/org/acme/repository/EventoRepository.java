@@ -1,6 +1,6 @@
-package org.acme.repository; // Pacote atualizado
+package org.acme.repository;
 
-import org.acme.model.Evento; // Import atualizado
+import org.acme.model.Evento;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
@@ -12,8 +12,7 @@ public class EventoRepository implements PanacheRepository<Evento> {
         return find("UPPER(nome) LIKE ?1", "%" + nome.toUpperCase() + "%").list();
     }
 
-    public List<Evento> findByOrganizador(Long idOrganizador) {
-        return find("organizador.id", idOrganizador).list();
+    public List<Evento> findByOrganizador(String organizador) {
+        return find("organizador", organizador).list();
     }
-
 }
