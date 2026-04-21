@@ -39,6 +39,7 @@ public class UsuarioResource {
     UsuarioService usuarioService;
     
     @POST
+    @RolesAllowed({"Adm"}) 
     public Response create(@Valid UsuarioDTO dto) {
         try {
             UsuarioResponseDTO novoUsuario = usuarioService.create(dto);

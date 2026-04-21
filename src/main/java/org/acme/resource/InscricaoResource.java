@@ -17,7 +17,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.DefaultValue;
+
 
 @Path("/inscricoes")
 @Consumes(MediaType.APPLICATION_JSON)

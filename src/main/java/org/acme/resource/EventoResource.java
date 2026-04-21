@@ -1,18 +1,29 @@
 package org.acme.resource;
 
 import org.acme.dto.EventoDTO;
+import org.acme.model.Evento;
 import org.acme.service.EventoService;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
+
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.quarkus.panache.common.Page;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.io.File;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 @Path("/eventos")
 @Produces(MediaType.APPLICATION_JSON)
@@ -26,6 +37,41 @@ public class EventoResource {
 
     @Inject
     EventoService service;
+
+  @GET
+@Path("/paginado")
+public Response listarPaginado(
+        @QueryParam("page") @DefaultValue("0") int page,
+        @QueryParam("size") @DefaultValue("6") int size,
+        @QueryParam("status") String status) {
+
+    LocalDateTime agora = LocalDateTime.now();
+    PanacheQuery<Evento> query;
+    
+    if ("realizados".equals(status)) {
+        query = Evento.find("dataHora < ?1 order by dataHora desc", agora);
+    } else if ("proximos".equals(status)) {
+        query = Evento.find("dataHora >= ?1 order by dataHora asc", agora);
+    } else {
+        // ✅ MOSTRA TODOS os eventos
+        query = Evento.find("order by dataHora desc");
+    }
+    
+    List<EventoDTO> content = query.page(Page.of(page, size))
+            .list()
+            .stream()
+            .map(EventoDTO::from)
+            .collect(Collectors.toList());
+    
+    Map<String, Object> response = new HashMap<>();
+    response.put("content", content);
+    response.put("totalElements", query.count());
+    response.put("totalPages", query.pageCount());
+    response.put("size", size);
+    response.put("number", page);
+    
+    return Response.ok(response).build();
+}
 
     /**
      * Lista todos os eventos (PÚBLICO - sem autenticação)
@@ -110,4 +156,28 @@ public class EventoResource {
 
         return Response.status(Response.Status.NO_CONTENT).build();
     }
+
+    // Adicione no EventoResource.java
+    @POST
+    @Path("/{id}/imagem-principal")
+    @RolesAllowed({"Adm"})
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Transactional
+    public Response uploadImagemPrincipal(
+    @PathParam("id") Long id,
+    @FormParam("imagem") File imagem,
+    @FormParam("nomeArquivo") String nomeArquivo
+    ) {
+    try {
+        // Salva no Cloudinary ou servidor local
+        String urlImagem = service.salvarImagemPrincipal(imagem, nomeArquivo);
+        service.atualizarImagemPrincipal(id, urlImagem);
+        
+        return Response.ok(Map.of("url", urlImagem)).build();
+    } catch (Exception e) {
+        return Response.status(Response.Status.BAD_REQUEST)
+            .entity(Map.of("error", e.getMessage()))
+            .build();
+    }
+}
 }

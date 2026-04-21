@@ -11,7 +11,13 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -132,5 +138,28 @@ public void removerImagemPrincipal(Long idEvento) {
     
     evento.setImagemPrincipal(null);
     eventoRepository.persist(evento);
+}
+    // Adicione no EventoService.java
+public String salvarImagemPrincipal(File imagem, String nomeArquivo) throws Exception {
+    // Solução SIMPLES: salva localmente (sem Cloudinary)
+    String uploadDir = System.getProperty("user.home") + "/uploads/eventos/";
+    File dir = new File(uploadDir);
+    if (!dir.exists()) dir.mkdirs();
+    
+    String nomeUnico = UUID.randomUUID().toString() + "_" + nomeArquivo;
+    File destino = new File(uploadDir + nomeUnico);
+    
+    // Copia arquivo
+    try (InputStream in = new FileInputStream(imagem);
+         OutputStream out = new FileOutputStream(destino)) {
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+            out.write(buffer, 0, length);
+        }
+    }
+    
+    // Retorna URL pública (precisa configurar servidor para servir arquivos)
+    return "/uploads/eventos/" + nomeUnico;
 }
 }
